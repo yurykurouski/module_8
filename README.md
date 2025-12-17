@@ -56,3 +56,41 @@ You need to connect MetaMask to your local blockchain and import the "owner" acc
 6.  **Execute Transaction**:
     *   Once 2 confirmations are reached, click **Execute**.
     *   The transaction status should change to **Executed**.
+
+## Design & Security Report
+
+### Introduction
+This project implements a Multi-Signature (Multi-Sig) Wallet smart contract in Solidity. A multi-sig wallet requires multiple owners to approve a transaction before it can be executed. This adds an extra layer of security compared to a standard single-owner wallet.
+
+### Architecture
+#### Owners and Confirmations
+*   **Owners**: The contract is initialized with a set of unique owner addresses. Only these addresses can submit and confirm transactions.
+*   **Required Confirmations**: A threshold (e.g., 2 out of 3) must be met for a transaction to be executed.
+
+#### Data Structures
+*   **Transaction Struct**: Stores destination (`to`), value (`value`), data (`data`), execution status (`executed`), and confirmation count (`numConfirmations`).
+*   **Mappings**: `isOwner` for O(1) owner checks, and `isConfirmed` to track approvals per transaction per owner.
+
+### Key Functions
+1.  **`submitTransaction`**: Allows an owner to propose a new transaction.
+2.  **`confirmTransaction`**: Allows an owner to approve a pending transaction.
+3.  **`revokeConfirmation`**: Allows an owner to undo their approval before execution.
+4.  **`executeTransaction`**: Executes a confirmed transaction if the confirmation threshold is met.
+
+### Security Analysis
+#### Access Control
+All sensitive state-changing functions are restricted with the `onlyOwner` modifier, ensuring only authorized parties can interact with the wallet funds.
+
+#### Reentrancy Protection
+The `executeTransaction` function follows the Checks-Effects-Interactions pattern:
+1.  **Checks**: Verifies confirmations and execution status.
+2.  **Effects**: Marks the transaction as `executed` *before* the external call.
+3.  **Interactions**: Performs the external `call`.
+This prevents reentrancy attacks where a malicious contract calls back into `executeTransaction` before the state is updated.
+
+#### Validation
+*   Constructor ensures owners are unique and non-zero.
+*   Required confirmations must be valid (greater than 0 and less than or equal to owner count).
+
+### Testing
+The contract is verified with a comprehensive Hardhat test suite ensuring 100% functional coverage of success scenarios and failure/revert cases.
