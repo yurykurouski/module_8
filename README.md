@@ -56,5 +56,3 @@ You need to connect MetaMask to your local blockchain and import the "owner" acc
 6.  **Execute Transaction**:
     *   Once 2 confirmations are reached, click **Execute**.
     *   The transaction status should change to **Executed**.
-
-> **Tip**: If you get "Nonce too high" errors in MetaMask after restarting the node, go to **Settings > Advanced > Clear activity tab data** in MetaMask to reset your account history for the local network.
